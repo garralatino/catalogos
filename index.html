@@ -1,1 +1,1756 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo de Productos</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#FF6B35',secondary:'#4ECDC4'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+font-family: 'Poppins', sans-serif;
+padding-top: 60px;
+padding-bottom: 70px;
+}
+.product-card:active {
+transform: scale(0.98);
+transition: transform 0.1s;
+}
+.cart-badge {
+position: absolute;
+top: -5px;
+right: -5px;
+font-size: 10px;
+width: 18px;
+height: 18px;
+border-radius: 50%;
+background-color: #FF6B35;
+color: white;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.color-option {
+width: 24px;
+height: 24px;
+border-radius: 50%;
+cursor: pointer;
+position: relative;
+}
+.color-option.selected::after {
+content: '';
+position: absolute;
+top: -3px;
+left: -3px;
+right: -3px;
+bottom: -3px;
+border-radius: 50%;
+border: 2px solid #FF6B35;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+.cart-drawer {
+transition: transform 0.3s ease-in-out;
+}
+.cart-drawer.open {
+transform: translateX(0);
+}
+.cart-drawer.closed {
+transform: translateX(100%);
+}
+.product-detail-modal {
+transition: opacity 0.3s ease-in-out;
+}
+.size-option {
+border: 1px solid #e2e8f0;
+padding: 4px 12px;
+border-radius: 4px;
+cursor: pointer;
+}
+.size-option.selected {
+border-color: #FF6B35;
+background-color: rgba(255, 107, 53, 0.1);
+color: #FF6B35;
+}
+</style>
+</head>
+<body class="bg-gray-50">
+<!-- Navbar -->
+<nav class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 px-4 py-3 flex items-center justify-between">
+<div class="flex items-center">
+<button id="menuBtn" class="w-10 h-10 flex items-center justify-center mr-3">
+<i class="ri-menu-line ri-lg"></i>
+</button>
+<h1 class="text-xl font-['Pacifico'] text-primary" id="storeName">logo</h1>
+</div>
+<div class="flex items-center">
+<button id="searchBtn" class="w-10 h-10 flex items-center justify-center">
+<i class="ri-search-line ri-lg"></i>
+</button>
+<button id="cartBtn" class="w-10 h-10 flex items-center justify-center relative">
+<i class="ri-shopping-cart-line ri-lg"></i>
+<span id="cartBadge" class="cart-badge">0</span>
+</button>
+<button id="adminBtn" class="w-10 h-10 flex items-center justify-center ml-1">
+<i class="ri-admin-line ri-lg"></i>
+</button>
+</div>
+</nav>
+<!-- Search Bar (Hidden by default) -->
+<div id="searchBar" class="fixed top-[60px] left-0 right-0 bg-white z-40 px-4 py-3 shadow-md hidden">
+<div class="relative">
+<input type="text" placeholder="Buscar productos..." class="w-full px-4 py-2 pr-10 border border-gray-200 rounded-button bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary">
+<button class="absolute right-3 top-2">
+<i class="ri-search-line ri-lg text-gray-400"></i>
+</button>
+</div>
+<div class="flex items-center space-x-2 mt-3 overflow-x-auto pb-2 whitespace-nowrap">
+<button class="px-3 py-1 bg-primary text-white rounded-full text-xs">Todos</button>
+<button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">Camisetas</button>
+<button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">Pantalones</button>
+<button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">Zapatos</button>
+<button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">Accesorios</button>
+<button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">Vestidos</button>
+</div>
+</div>
+<!-- Categories -->
+<div class="px-4 py-3">
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-lg font-medium">Categorías</h2>
+<button class="text-primary text-sm">Ver todas</button>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
+<style>
+.hide-scrollbar::-webkit-scrollbar {
+display: none;
+}
+.hide-scrollbar {
+-ms-overflow-x: hidden;
+scrollbar-width: none;
+}
+</style>
+<div class="flex flex-col items-center cursor-pointer flex-shrink-0 w-16" onclick="filterByCategory('all')">
+<div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-1 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20shopping%20bag%20with%20multiple%20items%20inside%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat0&orientation=squarish" alt="Todos" class="w-full h-full object-cover">
+</div>
+<span class="text-xs text-center whitespace-nowrap overflow-hidden text-overflow-ellipsis">Todos</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer flex-shrink-0 w-16" onclick="filterByCategory('camisetas')">
+<div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-1 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20t-shirt%20clothing%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat1&orientation=squarish" alt="Camisetas" class="w-full h-full object-cover">
+</div>
+<span class="text-xs text-center whitespace-nowrap overflow-hidden text-overflow-ellipsis">Camisetas</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer flex-shrink-0 w-16" onclick="filterByCategory('pantalones')">
+<div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-1 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20pants%20clothing%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat2&orientation=squarish" alt="Pantalones" class="w-full h-full object-cover">
+</div>
+<span class="text-xs text-center whitespace-nowrap overflow-hidden text-overflow-ellipsis">Pantalones</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer flex-shrink-0 w-16" onclick="filterByCategory('zapatos')">
+<div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-1 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20sneakers%20shoes%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat3&orientation=squarish" alt="Zapatos" class="w-full h-full object-cover">
+</div>
+<span class="text-xs text-center whitespace-nowrap overflow-hidden text-overflow-ellipsis">Zapatos</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer flex-shrink-0 w-16" onclick="filterByCategory('accesorios')">
+<div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-1 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20necklace%20jewelry%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat4&orientation=squarish" alt="Accesorios" class="w-full h-full object-cover">
+</div>
+<span class="text-xs text-center whitespace-nowrap overflow-hidden text-overflow-ellipsis">Accesorios</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer flex-shrink-0 w-16" onclick="filterByCategory('vestidos')">
+<div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-1 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20dress%20clothing%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat5&orientation=squarish" alt="Vestidos" class="w-full h-full object-cover">
+</div>
+<span class="text-xs text-center whitespace-nowrap overflow-hidden text-overflow-ellipsis">Vestidos</span>
+</div>
+</div>
+</div>
+<!-- Promotions Banner -->
+<div class="px-4 py-3">
+<div class="rounded-lg overflow-hidden relative h-36">
+<img src="https://readdy.ai/api/search-image?query=Fashion%20promotional%20banner%20with%20vibrant%20colors%2C%20summer%20collection%2C%20clothing%20items%20arranged%20aesthetically%2C%20clean%20modern%20design%2C%20promotional%20text%2C%20high-quality%20product%20photography%2C%20soft%20lighting%2C%20professional%20composition%2C%20marketing%20material%20for%20clothing%20store%2C%20seasonal%20sale%20announcement%2C%20fashion%20retail%20advertisement&width=375&height=150&seq=promo1&orientation=landscape" alt="Promoción" class="w-full h-full object-cover">
+<div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex flex-col justify-center px-6">
+<h3 class="text-white text-xl font-bold">Rebajas de Verano</h3>
+<p class="text-white text-sm mb-2">Hasta 50% de descuento</p>
+<button class="bg-white text-primary px-4 py-1 rounded-button text-sm font-medium w-max !rounded-button cursor-pointer">Ver ofertas</button>
+</div>
+</div>
+</div>
+<!-- Products Grid -->
+<div class="px-4 py-3">
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-lg font-medium">Productos Destacados</h2>
+<div class="flex items-center space-x-1">
+<span class="text-sm text-gray-500">Ordenar por:</span>
+<select class="text-sm border-none bg-transparent focus:outline-none">
+<option>Relevancia</option>
+<option>Precio: Menor a Mayor</option>
+<option>Precio: Mayor a Menor</option>
+<option>Más Recientes</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4" id="productsGrid">
+<!-- Product cards will be inserted here by JavaScript -->
+</div>
+</div>
+<!-- Add Options Floating Menu -->
+<div class="fixed bottom-20 right-4 flex flex-col items-end space-y-2 z-30">
+<div id="addOptionsMenu" class="hidden flex flex-col items-end space-y-2 mb-2">
+<button id="addCategoryBtn" class="h-12 px-4 rounded-full bg-primary text-white shadow-lg flex items-center space-x-2 cursor-pointer" onclick="showCategoryModal()">
+<span class="text-sm">Agregar Categoría</span>
+<i class="ri-folder-add-line"></i>
+</button>
+<button id="addProductBtn" class="h-12 px-4 rounded-full bg-primary text-white shadow-lg flex items-center space-x-2 cursor-pointer">
+<span class="text-sm">Agregar Producto</span>
+<i class="ri-shopping-bag-line"></i>
+</button>
+</div>
+<button id="toggleAddOptionsBtn" class="w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center cursor-pointer" onclick="showProductForm()">
+<i class="ri-add-fill ri-xl"></i>
+</button>
+</div>
+<!-- Category Management Modal -->
+<div id="categoryModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+<div class="bg-white w-full h-full overflow-y-auto">
+<div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+<h2 class="text-lg font-medium">Gestionar Categorías</h2>
+<button id="closeCategoryModalBtn" class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="p-4">
+<div class="mb-6">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-sm font-medium">Categorías Existentes</h3>
+<button id="addNewCategoryBtn" class="px-3 py-1 bg-primary text-white text-sm rounded-button !rounded-button flex items-center space-x-1">
+<i class="ri-add-line"></i>
+<span>Nueva Categoría</span>
+</button>
+</div>
+<div id="categoriesList" class="space-y-3">
+<!-- Categories will be inserted here by JavaScript -->
+</div>
+</div>
+<form id="categoryForm" class="space-y-4 hidden">
+<input type="hidden" id="categoryId">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Categoría</label>
+<input type="text" id="categoryName" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">URL de la Imagen</label>
+<input type="url" id="categoryImageURL" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+<p class="text-xs text-gray-500 mt-1">Ingresa la URL de la imagen de la categoría</p>
+</div>
+<div class="flex justify-end space-x-2">
+<button type="button" id="cancelCategoryBtn" class="px-4 py-2 border border-gray-300 rounded-button !rounded-button">Cancelar</button>
+<button type="submit" class="px-4 py-2 bg-primary text-white rounded-button !rounded-button">Guardar Categoría</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+<!-- Add Options Floating Menu -->
+<div class="fixed bottom-20 right-4 flex flex-col items-end space-y-2 z-30">
+<div id="addOptionsMenu" class="hidden flex flex-col items-end space-y-2 mb-2">
+<button id="addCategoryBtn" class="h-12 px-4 rounded-full bg-primary text-white shadow-lg flex items-center space-x-2 cursor-pointer" onclick="showCategoryModal()">
+<span class="text-sm">Gestionar Categorías</span>
+<i class="ri-folder-add-line"></i>
+</button>
+<button id="addProductBtn" class="h-12 px-4 rounded-full bg-primary text-white shadow-lg flex items-center space-x-2 cursor-pointer">
+<span class="text-sm">Agregar Producto</span>
+<i class="ri-shopping-bag-line"></i>
+</button>
+</div>
+<button id="toggleAddOptionsBtn" class="w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center cursor-pointer" onclick="showProductForm()">
+<i class="ri-add-fill ri-xl"></i>
+</button>
+<!-- WhatsApp Floating Button -->
+<a href="#" id="whatsappBtn" class="mt-2 w-14 h-14 rounded-full bg-green-500 text-white shadow-lg flex items-center justify-center cursor-pointer">
+<i class="ri-whatsapp-fill ri-xl"></i>
+</a>
+</div>
+<!-- Category Management Modal -->
+<div id="categoryModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+<div class="bg-white w-full h-full overflow-y-auto">
+<div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+<h2 class="text-lg font-medium">Gestionar Categorías</h2>
+<button id="closeCategoryModalBtn" class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="p-4">
+<div class="mb-6">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-sm font-medium">Categorías Existentes</h3>
+<button id="addNewCategoryBtn" class="px-3 py-1 bg-primary text-white text-sm rounded-button !rounded-button flex items-center space-x-1">
+<i class="ri-add-line"></i>
+<span>Nueva Categoría</span>
+</button>
+</div>
+<div id="categoriesList" class="space-y-3">
+<!-- Categories will be inserted here by JavaScript -->
+</div>
+</div>
+<form id="categoryForm" class="space-y-4 hidden">
+<input type="hidden" id="categoryId">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Categoría</label>
+<input type="text" id="categoryName" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">URL de la Imagen</label>
+<input type="url" id="categoryImageURL" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+<p class="text-xs text-gray-500 mt-1">Ingresa la URL de la imagen de la categoría</p>
+</div>
+<div class="flex justify-end space-x-2">
+<button type="button" id="cancelCategoryBtn" class="px-4 py-2 border border-gray-300 rounded-button !rounded-button">Cancelar</button>
+<button type="submit" class="px-4 py-2 bg-primary text-white rounded-button !rounded-button">Guardar Categoría</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+<!-- Tab Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-40">
+<div class="grid grid-cols-4 h-16">
+<button class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-home-5-fill ri-lg text-primary"></i>
+</div>
+<span class="text-xs mt-1 text-primary">Inicio</span>
+</button>
+<button id="categoriesBtn" class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-apps-line ri-lg text-gray-500"></i>
+</div>
+<span class="text-xs mt-1 text-gray-500">Categorías</span>
+</button>
+<!-- Categories Modal -->
+<div id="categoriesModal" class="fixed inset-0 bg-black/50 z-50 hidden">
+<div class="bg-white w-full h-[50%] absolute bottom-0 rounded-t-2xl overflow-hidden">
+<div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+<h2 class="text-lg font-medium">Categorías</h2>
+<button id="closeCategoriesBtn" class="w-10 h-10 flex items-center justify-center">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="p-4 grid grid-cols-1 gap-3" id="categoryButtonsContainer">
+<button class="w-full text-left px-4 py-3 bg-gray-50 rounded-lg flex items-center justify-between hover:bg-gray-100" onclick="filterByCategory('all')">
+<div class="flex items-center">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+<i class="ri-apps-line text-primary"></i>
+</div>
+<span>Todos los productos</span>
+</div>
+<i class="ri-arrow-right-s-line text-gray-400"></i>
+</button>
+</div>
+</div>
+</div>
+<button class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-heart-line ri-lg text-gray-500"></i>
+</div>
+<span class="text-xs mt-1 text-gray-500">Favoritos</span>
+</button>
+<button id="tabCartBtn" class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-shopping-cart-line ri-lg text-gray-500"></i>
+</div>
+<span class="text-xs mt-1 text-gray-500">Carrito</span>
+</button>
+</div>
+</div>
+<!-- Cart Drawer -->
+<div id="cartDrawer" class="fixed top-0 right-0 bottom-0 w-full bg-white z-50 shadow-xl cart-drawer closed">
+<div class="flex flex-col h-full">
+<div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+<h2 class="text-lg font-medium">Carrito de Compras</h2>
+<button id="closeCartBtn" class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div id="cartItems" class="flex-1 overflow-y-auto p-4">
+<!-- Cart items will be inserted here by JavaScript -->
+<div class="flex items-center justify-center h-full text-gray-400">
+<div class="text-center">
+<div class="w-16 h-16 flex items-center justify-center mx-auto mb-3">
+<i class="ri-shopping-cart-line ri-3x"></i>
+</div>
+<p>Tu carrito está vacío</p>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-gray-200">
+<div class="flex justify-between mb-2">
+<span class="text-gray-600">Subtotal:</span>
+<span id="cartSubtotal" class="font-medium">$0.00</span>
+</div>
+<div class="flex justify-between mb-3">
+<span class="text-gray-600">Descuento:</span>
+<span id="cartDiscount" class="font-medium text-green-500">-$0.00</span>
+</div>
+<div class="flex justify-between mb-4">
+<span class="font-medium">Total:</span>
+<span id="cartTotal" class="font-bold text-lg">$0.00</span>
+</div>
+<button id="checkoutBtn" class="w-full bg-primary text-white py-3 rounded-button font-medium !rounded-button cursor-pointer">
+Finalizar Compra
+</button>
+</div>
+</div>
+</div>
+<!-- Product Detail Modal -->
+<div id="productDetailModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center product-detail-modal hidden">
+<div class="bg-white w-full h-full overflow-y-auto">
+<div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+<h2 class="text-lg font-medium">Detalles del Producto</h2>
+<button id="closeDetailBtn" class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div id="productDetailContent" class="p-4">
+<!-- Product detail content will be inserted here by JavaScript -->
+</div>
+</div>
+</div>
+<!-- Admin Product Form Modal -->
+<div id="productFormModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+<div class="bg-white w-full h-full overflow-y-auto">
+<div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+<h2 id="formTitle" class="text-lg font-medium">Agregar Producto</h2>
+<button id="closeFormBtn" class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<form id="productForm" class="p-4">
+<input type="hidden" id="productId">
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
+<input type="text" id="productName" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+</div>
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+<textarea id="productDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required></textarea>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Precio (MXN)</label>
+<input type="number" id="productPrice" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" min="0" step="0.01" required>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Precio con Descuento</label>
+<input type="number" id="productDiscountPrice" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" min="0" step="0.01">
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+<input type="text" id="productSKU" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+<input type="number" id="productStock" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" min="0" required>
+</div>
+</div>
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+<select id="productCategory" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+<option value="">Seleccionar categoría</option>
+<option value="camisetas">Camisetas</option>
+<option value="pantalones">Pantalones</option>
+<option value="zapatos">Zapatos</option>
+<option value="accesorios">Accesorios</option>
+<option value="vestidos">Vestidos</option>
+</select>
+</div>
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1">Tallas Disponibles</label>
+<div class="flex flex-wrap gap-2">
+<label class="flex items-center">
+<input type="checkbox" name="sizes" value="XS" class="mr-1">
+<span>XS</span>
+</label>
+<label class="flex items-center">
+<input type="checkbox" name="sizes" value="S" class="mr-1">
+<span>S</span>
+</label>
+<label class="flex items-center">
+<input type="checkbox" name="sizes" value="M" class="mr-1">
+<span>M</span>
+</label>
+<label class="flex items-center">
+<input type="checkbox" name="sizes" value="L" class="mr-1">
+<span>L</span>
+</label>
+<label class="flex items-center">
+<input type="checkbox" name="sizes" value="XL" class="mr-1">
+<span>XL</span>
+</label>
+<label class="flex items-center">
+<input type="checkbox" name="sizes" value="XXL" class="mr-1">
+<span>XXL</span>
+</label>
+</div>
+</div>
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1">Colores Disponibles</label>
+<div class="flex flex-wrap gap-2">
+<label class="flex items-center">
+<input type="checkbox" name="colors" value="Negro" class="mr-1">
+<span>Negro</span>
+</label>
+<label class="flex items-center">
+<input type="checkbox" name="colors" value="Blanco" class="mr-1">
+<span>Blanco</span>
+</label>
+<label class="flex items-center">
+<input type="checkbox" name="colors" value="Rojo" class="mr-1">
+<span>Rojo</span>
+</label>
+<label class="flex items-center">
+<input type="checkbox" name="colors" value="Azul" class="mr-1">
+<span>Azul</span>
+</label>
+<label class="flex items-center">
+<input type="checkbox" name="colors" value="Verde" class="mr-1">
+<span>Verde</span>
+</label>
+</div>
+</div>
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1">URL de la Imagen</label>
+<input type="url" id="productImageURL" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+<p class="text-xs text-gray-500 mt-1">Ingresa la URL de la imagen principal del producto</p>
+</div>
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1">URL del Video (opcional)</label>
+<input type="url" id="productVideoURL" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary">
+<p class="text-xs text-gray-500 mt-1">Ingresa la URL del video del producto (YouTube, Vimeo, etc.)</p>
+</div>
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1">Promoción (opcional)</label>
+<select id="productPromotion" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary">
+<option value="">Sin promoción</option>
+<option value="nuevo">Nuevo</option>
+<option value="oferta">Oferta</option>
+<option value="limitado">Edición Limitada</option>
+</select>
+</div>
+<div class="flex justify-end mt-6">
+<button type="button" id="cancelFormBtn" class="px-4 py-2 border border-gray-300 rounded-button mr-2 !rounded-button cursor-pointer">Cancelar</button>
+<button type="submit" class="px-4 py-2 bg-primary text-white rounded-button !rounded-button cursor-pointer">Guardar Producto</button>
+</div>
+</form>
+</div>
+</div>
+<!-- Admin Login Modal -->
+<div id="adminLoginModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+<div class="bg-white w-[320px] rounded-lg p-6">
+<h2 class="text-lg font-medium mb-4">Acceso Administrador</h2>
+<form id="adminLoginForm" class="space-y-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+<input type="text" id="adminUsername" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+<input type="password" id="adminPassword" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" required>
+</div>
+<div class="flex justify-end space-x-2">
+<button type="button" id="closeAdminLoginBtn" class="px-4 py-2 border border-gray-300 rounded-button !rounded-button">Cancelar</button>
+<button type="submit" class="px-4 py-2 bg-primary text-white rounded-button !rounded-button">Ingresar</button>
+</div>
+</form>
+</div>
+</div>
+<!-- Admin Settings Panel -->
+<div id="adminSettingsPanel" class="fixed inset-0 bg-white z-50 hidden">
+<div class="flex flex-col h-full">
+<div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+<h2 class="text-lg font-medium">Panel de Administración</h2>
+<button id="closeAdminSettingsBtn" class="w-10 h-10 flex items-center justify-center">
+<i class="ri-close-line ri-lg"></i>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4">
+<div class="space-y-6">
+<!-- Store Information -->
+<div class="bg-white rounded-lg p-4 border border-gray-200">
+<h3 class="text-lg font-medium mb-4">Información del Negocio</h3>
+<div class="space-y-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Negocio</label>
+<input type="text" id="settingsStoreName" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary">
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Logo del Negocio (URL)</label>
+<input type="url" id="settingsStoreLogo" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary">
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Teléfono para Pedidos</label>
+<div class="flex">
+<select id="settingsCountryCode" class="w-24 px-3 py-2 border border-gray-300 rounded-l-button focus:outline-none focus:ring-1 focus:ring-primary">
+<option value="+52">🇲🇽 +52</option>
+<option value="+51">🇵🇪 +51</option>
+<option value="+54">🇦🇷 +54</option>
+<option value="+57">🇨🇴 +57</option>
+<option value="+56">🇨🇱 +56</option>
+<option value="+58">🇻🇪 +58</option>
+<option value="+34">🇪🇸 +34</option>
+<option value="+1">🇺🇸 +1</option>
+</select>
+<input type="tel" id="settingsStorePhone" class="flex-1 px-3 py-2 border-y border-r border-gray-300 rounded-r-button focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Número de teléfono">
+</div>
+</div>
+</div>
+</div>
+<!-- Currency Settings -->
+<div class="bg-white rounded-lg p-4 border border-gray-200">
+<h3 class="text-lg font-medium mb-4">Configuración de Moneda</h3>
+<div class="space-y-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Moneda</label>
+<select id="settingsCurrency" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary">
+<option value="MXN">Peso Mexicano (MXN)</option>
+<option value="USD">Dólar Estadounidense (USD)</option>
+<option value="PEN">Sol Peruano (PEN)</option>
+<option value="EUR">Euro (EUR)</option>
+<option value="COP">Peso Colombiano (COP)</option>
+<option value="ARS">Peso Argentino (ARS)</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Símbolo de Moneda</label>
+<input type="text" id="settingsCurrencySymbol" class="w-full px-3 py-2 border border-gray-300 rounded-button focus:outline-none focus:ring-1 focus:ring-primary" readonly>
+</div>
+</div>
+</div>
+<!-- Theme Settings -->
+<div class="bg-white rounded-lg p-4 border border-gray-200">
+<h3 class="text-lg font-medium mb-4">Personalización</h3>
+<div class="space-y-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Color Principal</label>
+<input type="color" id="settingsPrimaryColor" class="w-full h-10 rounded-button cursor-pointer">
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Color Secundario</label>
+<input type="color" id="settingsSecondaryColor" class="w-full h-10 rounded-button cursor-pointer">
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-gray-200">
+<button id="saveSettingsBtn" class="w-full bg-primary text-white py-3 rounded-button font-medium !rounded-button">
+Guardar Cambios
+</button>
+</div>
+</div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+const toggleAddOptionsBtn = document.getElementById('toggleAddOptionsBtn');
+window.showProductForm = function() {
+document.getElementById('formTitle').textContent = 'Agregar Producto';
+document.getElementById('productForm').reset();
+document.getElementById('productId').value = '';
+document.getElementById('productFormModal').classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+};
+toggleAddOptionsBtn.addEventListener('click', showProductForm);
+document.addEventListener('click', function(event) {
+if (!toggleAddOptionsBtn.contains(event.target) && !addOptionsMenu.contains(event.target)) {
+addOptionsMenu.classList.add('hidden');
+toggleAddOptionsBtn.setAttribute('aria-expanded', 'false');
+}
+});
+const categoriesBtn = document.getElementById('categoriesBtn');
+const categoriesModal = document.getElementById('categoriesModal');
+const closeCategoriesBtn = document.getElementById('closeCategoriesBtn');
+const categoriesContainer = categoriesModal.querySelector('.grid');
+categoriesBtn.addEventListener('click', function() {
+categoriesModal.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+renderCategoryButtons();
+});
+closeCategoriesBtn.addEventListener('click', function() {
+categoriesModal.classList.add('hidden');
+document.body.style.overflow = '';
+});
+function renderCategoryButtons() {
+const categoryButtonsContainer = document.getElementById('categoryButtonsContainer');
+categoryButtonsContainer.innerHTML = `
+<button class="w-full text-left px-4 py-3 bg-gray-50 rounded-lg flex items-center justify-between hover:bg-gray-100" onclick="filterByCategory('all')">
+<div class="flex items-center">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+<i class="ri-apps-line text-primary"></i>
+</div>
+<span>Todos los productos</span>
+</div>
+<i class="ri-arrow-right-s-line text-gray-400"></i>
+</button>
+`;
+categories.forEach(category => {
+const button = document.createElement('button');
+button.className = 'w-full text-left px-4 py-3 bg-gray-50 rounded-lg flex items-center justify-between hover:bg-gray-100';
+button.onclick = () => filterByCategory(category.name.toLowerCase());
+button.innerHTML = `
+<div class="flex items-center">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden mr-3">
+<img src="${category.imageURL}" alt="${category.name}" class="w-full h-full object-cover">
+</div>
+<span>${category.name}</span>
+</div>
+<i class="ri-arrow-right-s-line text-gray-400"></i>
+`;
+categoryButtonsContainer.appendChild(button);
+});
+}
+window.filterByCategory = function(category) {
+const filteredProducts = category === 'all'
+? products
+: products.filter(p => p.category.toLowerCase() === category);
+const productsGrid = document.getElementById('productsGrid');
+productsGrid.innerHTML = '';
+if (filteredProducts.length === 0) {
+productsGrid.innerHTML = `
+<div class="col-span-2 py-8 text-center text-gray-500">
+<div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+<i class="ri-inbox-line ri-3x"></i>
+</div>
+<p>No hay productos en esta categoría</p>
+</div>
+`;
+} else {
+renderProducts(filteredProducts);
+}
+document.getElementById('categoriesModal').classList.add('hidden');
+document.body.style.overflow = '';
+const categoryText = category === 'all' ? 'Categorías' : categories.find(c => c.name.toLowerCase() === category)?.name || 'Categorías';
+document.querySelector('#categoriesBtn span').textContent = categoryText;
+};
+window.filterByCategory = function(category) {
+const filteredProducts = category === 'all'
+? products
+: products.filter(p => p.category.toLowerCase() === category);
+const productsGrid = document.getElementById('productsGrid');
+productsGrid.innerHTML = '';
+if (filteredProducts.length === 0) {
+productsGrid.innerHTML = `
+<div class="col-span-2 py-8 text-center text-gray-500">
+<div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+<i class="ri-inbox-line ri-3x"></i>
+</div>
+<p>No hay productos en esta categoría</p>
+</div>
+`;
+} else {
+filteredProducts.forEach(product => {
+const productCard = document.createElement('div');
+productCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden product-card cursor-pointer';
+productCard.dataset.id = product.id;
+const isAdmin = localStorage.getItem('adminLoggedIn') === 'true';
+const hasDiscount = product.discountPrice > 0 && product.discountPrice < product.price;
+const settings = JSON.parse(localStorage.getItem('storeSettings')) || {
+storeName: 'logo',
+storeLogo: '',
+storePhone: '',
+currency: 'MXN',
+currencySymbol: '$',
+primaryColor: '#FF6B35',
+secondaryColor: '#4ECDC4'
+};
+productCard.innerHTML = `
+<div class="relative">
+<img src="${product.imageURL}" alt="${product.name}" class="w-full h-40 object-cover object-top" onclick="showProductDetail(${product.id})">
+${isAdmin ? `
+<div class="absolute top-2 right-2 flex items-center space-x-1">
+<button class="edit-product-btn w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 cursor-pointer">
+<i class="ri-edit-line"></i>
+</button>
+<button class="delete-product-btn w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 cursor-pointer">
+<i class="ri-delete-bin-line"></i>
+</button>
+</div>` : ''}
+${product.videoURL ? '<div class="absolute bottom-2 right-2 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center"><i class="ri-play-fill text-white"></i></div>' : ''}
+${product.promotion ? `<div class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded-full">${getPromotionLabel(product.promotion)}</div>` : ''}
+<div class="absolute inset-0 bg-black/5 opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
+</div>
+<div class="p-3">
+<h3 class="text-sm font-medium mb-1 line-clamp-1">${product.name}</h3>
+<div class="flex items-center mb-2">
+${hasDiscount ?
+`<span class="text-primary font-medium">${settings.currencySymbol}${product.discountPrice.toFixed(2)}</span>
+<span class="text-gray-400 text-xs line-through ml-2">${settings.currencySymbol}${product.price.toFixed(2)}</span>` :
+`<span class="text-gray-800 font-medium">${settings.currencySymbol}${product.price.toFixed(2)}</span>`
+}
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-gray-500">Stock: ${product.stock}</span>
+<button class="add-to-cart-btn bg-primary text-white text-xs px-2 py-1 rounded-button !rounded-button cursor-pointer">
+<i class="ri-shopping-cart-line"></i> Agregar
+</button>
+</div>
+</div>
+`;
+productsGrid.appendChild(productCard);
+// Add event listeners
+productCard.addEventListener('click', () => showProductDetail(product.id));
+const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+addToCartBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+addToCart(product.id);
+});
+const editBtn = productCard.querySelector('.edit-product-btn');
+if (editBtn) {
+editBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+editProduct(product.id);
+});
+}
+const deleteBtn = productCard.querySelector('.delete-product-btn');
+if (deleteBtn) {
+deleteBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+deleteProduct(product.id);
+});
+}
+});
+}
+categoriesModal.classList.add('hidden');
+document.body.style.overflow = '';
+searchBar.classList.add('hidden');
+// Update category button text
+const categoryText = category === 'all' ? 'Categorías' : categories.find(c => c.name.toLowerCase() === category)?.name || 'Categorías';
+categoriesBtn.querySelector('span').textContent = categoryText;
+};
+// Load products from localStorage or use default products
+let products = JSON.parse(localStorage.getItem('products')) || [
+{
+id: 1,
+name: "Camiseta Casual Manga Corta",
+description: "Camiseta de algodón 100% con diseño moderno y cómodo para uso diario. Ideal para combinar con jeans o pantalones casuales.",
+price: 349.99,
+discountPrice: 299.99,
+sku: "CAM-001",
+stock: 25,
+category: "camisetas",
+sizes: ["S", "M", "L", "XL"],
+colors: ["Negro", "Blanco", "Azul"],
+imageURL: "https://readdy.ai/api/search-image?query=realistic%20photography%20of%20a%20plain%20white%20t-shirt%20on%20a%20mannequin%2C%20studio%20lighting%2C%20clean%20background%2C%20professional%20product%20photography%2C%20high%20resolution%2C%20detailed%20fabric%20texture%2C%20fashion%20catalog%20style%2C%20minimalist%20aesthetic%2C%20commercial%20quality&width=300&height=400&seq=prod1&orientation=portrait",
+videoURL: "",
+promotion: "nuevo"
+},
+{
+id: 2,
+name: "Pantalón Slim Fit",
+description: "Pantalón elegante con corte slim fit, perfecto para ocasiones formales o semi-formales. Confeccionado con tela de alta calidad.",
+price: 599.99,
+discountPrice: 499.99,
+sku: "PAN-002",
+stock: 15,
+category: "pantalones",
+sizes: ["28", "30", "32", "34", "36"],
+colors: ["Negro", "Azul Marino", "Gris"],
+imageURL: "https://readdy.ai/api/search-image?query=realistic%20photography%20of%20black%20slim%20fit%20pants%20on%20a%20mannequin%2C%20studio%20lighting%2C%20clean%20background%2C%20professional%20product%20photography%2C%20high%20resolution%2C%20detailed%20fabric%20texture%2C%20fashion%20catalog%20style%2C%20minimalist%20aesthetic%2C%20commercial%20quality&width=300&height=400&seq=prod2&orientation=portrait",
+videoURL: "",
+promotion: "oferta"
+},
+{
+id: 3,
+name: "Vestido Floral Verano",
+description: "Vestido ligero con estampado floral, perfecto para la temporada de verano. Diseño fresco y cómodo para días calurosos.",
+price: 499.99,
+discountPrice: 0,
+sku: "VES-003",
+stock: 10,
+category: "vestidos",
+sizes: ["XS", "S", "M", "L"],
+colors: ["Multicolor"],
+imageURL: "https://readdy.ai/api/search-image?query=realistic%20photography%20of%20a%20floral%20summer%20dress%20on%20a%20mannequin%2C%20studio%20lighting%2C%20clean%20background%2C%20professional%20product%20photography%2C%20high%20resolution%2C%20detailed%20fabric%20texture%2C%20fashion%20catalog%20style%2C%20minimalist%20aesthetic%2C%20commercial%20quality&width=300&height=400&seq=prod3&orientation=portrait",
+videoURL: "",
+promotion: ""
+},
+{
+id: 4,
+name: "Zapatillas Deportivas",
+description: "Zapatillas deportivas con suela de goma y diseño ergonómico. Ideales para running o uso casual diario.",
+price: 899.99,
+discountPrice: 799.99,
+sku: "ZAP-004",
+stock: 8,
+category: "zapatos",
+sizes: ["38", "39", "40", "41", "42", "43"],
+colors: ["Negro/Blanco", "Azul/Gris", "Rojo/Negro"],
+imageURL: "https://readdy.ai/api/search-image?query=realistic%20photography%20of%20white%20and%20black%20sports%20sneakers%2C%20studio%20lighting%2C%20clean%20background%2C%20professional%20product%20photography%2C%20high%20resolution%2C%20detailed%20texture%2C%20fashion%20catalog%20style%2C%20minimalist%20aesthetic%2C%20commercial%20quality&width=300&height=400&seq=prod4&orientation=portrait",
+videoURL: "",
+promotion: "limitado"
+},
+{
+id: 5,
+name: "Collar Minimalista",
+description: "Collar de plata con diseño minimalista y elegante. Perfecto para complementar cualquier atuendo casual o formal.",
+price: 299.99,
+discountPrice: 0,
+sku: "ACC-005",
+stock: 20,
+category: "accesorios",
+sizes: ["Único"],
+colors: ["Plateado", "Dorado"],
+imageURL: "https://readdy.ai/api/search-image?query=realistic%20photography%20of%20a%20minimalist%20silver%20necklace%20on%20display%2C%20studio%20lighting%2C%20clean%20background%2C%20professional%20product%20photography%2C%20high%20resolution%2C%20detailed%20texture%2C%20jewelry%20catalog%20style%2C%20minimalist%20aesthetic%2C%20commercial%20quality&width=300&height=400&seq=prod5&orientation=portrait",
+videoURL: "",
+promotion: ""
+},
+{
+id: 6,
+name: "Chaqueta de Cuero",
+description: "Chaqueta de cuero genuino con forro interior. Estilo clásico y atemporal para un look elegante y rebelde.",
+price: 1299.99,
+discountPrice: 999.99,
+sku: "CHA-006",
+stock: 5,
+category: "camisetas",
+sizes: ["M", "L", "XL"],
+colors: ["Negro", "Marrón"],
+imageURL: "https://readdy.ai/api/search-image?query=realistic%20photography%20of%20a%20black%20leather%20jacket%20on%20a%20mannequin%2C%20studio%20lighting%2C%20clean%20background%2C%20professional%20product%20photography%2C%20high%20resolution%2C%20detailed%20leather%20texture%2C%20fashion%20catalog%20style%2C%20minimalist%20aesthetic%2C%20commercial%20quality&width=300&height=400&seq=prod6&orientation=portrait",
+videoURL: "",
+promotion: "oferta"
+}
+];
+// Cart data
+let cart = [];
+// DOM elements
+const productsGrid = document.getElementById('productsGrid');
+const cartDrawer = document.getElementById('cartDrawer');
+const cartItems = document.getElementById('cartItems');
+const cartBadge = document.getElementById('cartBadge');
+const cartSubtotal = document.getElementById('cartSubtotal');
+const cartDiscount = document.getElementById('cartDiscount');
+const cartTotal = document.getElementById('cartTotal');
+const productDetailModal = document.getElementById('productDetailModal');
+const productDetailContent = document.getElementById('productDetailContent');
+const productFormModal = document.getElementById('productFormModal');
+const productForm = document.getElementById('productForm');
+const searchBar = document.getElementById('searchBar');
+// Render products in grid
+function renderProducts(productsToRender = products) {
+const settings = JSON.parse(localStorage.getItem('storeSettings')) || {
+storeName: 'logo',
+storeLogo: '',
+storePhone: '',
+currency: 'MXN',
+currencySymbol: '$',
+primaryColor: '#FF6B35',
+secondaryColor: '#4ECDC4'
+};
+productsGrid.innerHTML = '';
+products.forEach(product => {
+const productCard = document.createElement('div');
+productCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden product-card cursor-pointer';
+productCard.dataset.id = product.id;
+const isAdmin = localStorage.getItem('adminLoggedIn') === 'true';
+const hasDiscount = product.discountPrice > 0 && product.discountPrice < product.price;
+const settings = JSON.parse(localStorage.getItem('storeSettings')) || {
+storeName: 'logo',
+storeLogo: '',
+storePhone: '',
+currency: 'MXN',
+currencySymbol: '$',
+primaryColor: '#FF6B35',
+secondaryColor: '#4ECDC4'
+};
+productCard.innerHTML = `
+<div class="relative">
+<img src="${product.imageURL}" alt="${product.name}" class="w-full h-40 object-cover object-top" onclick="showProductDetail(${product.id})">
+${isAdmin ? `
+<div class="absolute top-2 right-2 flex items-center space-x-1">
+<button class="edit-product-btn w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 cursor-pointer">
+<i class="ri-edit-line"></i>
+</button>
+<button class="delete-product-btn w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 cursor-pointer">
+<i class="ri-delete-bin-line"></i>
+</button>
+</div>` : ''}
+${product.videoURL ? '<div class="absolute bottom-2 right-2 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center"><i class="ri-play-fill text-white"></i></div>' : ''}
+${product.promotion ? `<div class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded-full">${getPromotionLabel(product.promotion)}</div>` : ''}
+<div class="absolute inset-0 bg-black/5 opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
+</div>
+<div class="p-3">
+<h3 class="text-sm font-medium mb-1 line-clamp-1">${product.name}</h3>
+<div class="flex items-center mb-2">
+${hasDiscount ?
+`<span class="text-primary font-medium">${settings.currencySymbol}${product.discountPrice.toFixed(2)}</span>
+<span class="text-gray-400 text-xs line-through ml-2">${settings.currencySymbol}${product.price.toFixed(2)}</span>` :
+`<span class="text-gray-800 font-medium">${settings.currencySymbol}${product.price.toFixed(2)}</span>`
+}
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-gray-500">Stock: ${product.stock}</span>
+<button class="add-to-cart-btn bg-primary text-white text-xs px-2 py-1 rounded-button !rounded-button cursor-pointer">
+<i class="ri-shopping-cart-line"></i> Agregar
+</button>
+</div>
+</div>
+`;
+productsGrid.appendChild(productCard);
+// Add event listeners
+productCard.addEventListener('click', () => showProductDetail(product.id));
+const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+addToCartBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+addToCart(product.id);
+});
+const editBtn = productCard.querySelector('.edit-product-btn');
+if (editBtn) {
+editBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+editProduct(product.id);
+});
+}
+const deleteBtn = productCard.querySelector('.delete-product-btn');
+if (deleteBtn) {
+deleteBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+deleteProduct(product.id);
+});
+}
+});
+}
+// Get promotion label
+function getPromotionLabel(promotion) {
+switch(promotion) {
+case 'nuevo': return 'Nuevo';
+case 'oferta': return 'Oferta';
+case 'limitado': return 'Limitado';
+default: return '';
+}
+}
+// Show product detail
+function showProductDetail(productId) {
+const product = products.find(p => p.id === productId);
+if (!product) return;
+productDetailContent.innerHTML = `
+<div class="mb-4">
+<div class="relative rounded-lg overflow-hidden mb-3">
+<img src="${product.imageURL}" alt="${product.name}" class="w-full h-[500px] object-cover object-top">
+${product.videoURL ? '<div class="absolute bottom-4 right-4 w-12 h-12 bg-black/50 rounded-full flex items-center justify-center cursor-pointer"><i class="ri-play-fill ri-xl text-white"></i></div>' : ''}
+</div>
+${product.promotion ? `<div class="inline-block bg-primary text-white text-xs px-2 py-1 rounded-full mb-2">${getPromotionLabel(product.promotion)}</div>` : ''}
+<h1 class="text-xl font-medium mb-1">${product.name}</h1>
+<p class="text-sm text-gray-500 mb-3">SKU: ${product.sku}</p>
+<div class="flex items-center mb-4">
+${product.discountPrice > 0 && product.discountPrice < product.price ?
+`<span class="text-primary text-xl font-medium">$${product.discountPrice.toFixed(2)}</span>
+<span class="text-gray-400 text-sm line-through ml-2">$${product.price.toFixed(2)}</span>` :
+`<span class="text-gray-800 text-xl font-medium">$${product.price.toFixed(2)}</span>`
+}
+</div>
+<div class="mb-4">
+<h3 class="text-sm font-medium mb-2">Tallas:</h3>
+<div class="flex flex-wrap gap-2">
+${product.sizes.map(size => `<div class="size-option cursor-pointer">${size}</div>`).join('')}
+</div>
+</div>
+<div class="mb-4">
+<h3 class="text-sm font-medium mb-2">Colores:</h3>
+<div class="flex flex-wrap gap-3">
+${product.colors.map(color => {
+const colorCode = getColorCode(color);
+return `<div class="color-option cursor-pointer" style="background-color: ${colorCode};" data-color="${color}"></div>`;
+}).join('')}
+</div>
+</div>
+<div class="mb-4">
+<h3 class="text-sm font-medium mb-2">Cantidad:</h3>
+<div class="flex items-center">
+<button class="decrease-qty w-10 h-10 border border-gray-300 rounded-l-button flex items-center justify-center cursor-pointer">
+<i class="ri-subtract-line"></i>
+</button>
+<input type="number" class="qty-input w-16 h-10 border-t border-b border-gray-300 text-center" value="1" min="1" max="${product.stock}">
+<button class="increase-qty w-10 h-10 border border-gray-300 rounded-r-button flex items-center justify-center cursor-pointer">
+<i class="ri-add-line"></i>
+</button>
+<span class="ml-3 text-sm text-gray-500">Disponibles: ${product.stock}</span>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<h3 class="text-sm font-medium mb-2">Descripción:</h3>
+<p class="text-sm text-gray-600">${product.description}</p>
+</div>
+<button class="detail-add-to-cart w-full bg-primary text-white py-3 rounded-button font-medium !rounded-button cursor-pointer">
+Agregar al Carrito
+</button>
+`;
+productDetailModal.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+// Add event listeners
+const sizeOptions = productDetailContent.querySelectorAll('.size-option');
+sizeOptions.forEach(option => {
+option.addEventListener('click', function() {
+sizeOptions.forEach(opt => opt.classList.remove('selected'));
+this.classList.add('selected');
+});
+});
+const colorOptions = productDetailContent.querySelectorAll('.color-option');
+colorOptions.forEach(option => {
+option.addEventListener('click', function() {
+colorOptions.forEach(opt => opt.classList.remove('selected'));
+this.classList.add('selected');
+});
+});
+const decreaseBtn = productDetailContent.querySelector('.decrease-qty');
+const increaseBtn = productDetailContent.querySelector('.increase-qty');
+const qtyInput = productDetailContent.querySelector('.qty-input');
+decreaseBtn.addEventListener('click', function() {
+let value = parseInt(qtyInput.value);
+if (value > 1) {
+qtyInput.value = value - 1;
+}
+});
+increaseBtn.addEventListener('click', function() {
+let value = parseInt(qtyInput.value);
+if (value < product.stock) {
+qtyInput.value = value + 1;
+}
+});
+const addToCartBtn = productDetailContent.querySelector('.detail-add-to-cart');
+addToCartBtn.addEventListener('click', function() {
+const selectedSize = productDetailContent.querySelector('.size-option.selected');
+const selectedColor = productDetailContent.querySelector('.color-option.selected');
+const quantity = parseInt(qtyInput.value);
+if (!selectedSize) {
+showNotification('Por favor selecciona una talla');
+return;
+}
+if (!selectedColor) {
+showNotification('Por favor selecciona un color');
+return;
+}
+addToCart(product.id, {
+size: selectedSize.textContent,
+color: selectedColor.dataset.color,
+quantity: quantity
+});
+productDetailModal.classList.add('hidden');
+document.body.style.overflow = '';
+showNotification('Producto agregado al carrito');
+});
+}
+// Get color code from color name
+function getColorCode(colorName) {
+const colorMap = {
+'Negro': '#000000',
+'Blanco': '#FFFFFF',
+'Rojo': '#FF0000',
+'Azul': '#0000FF',
+'Verde': '#008000',
+'Amarillo': '#FFFF00',
+'Naranja': '#FFA500',
+'Morado': '#800080',
+'Rosa': '#FFC0CB',
+'Gris': '#808080',
+'Marrón': '#A52A2A',
+'Azul Marino': '#000080',
+'Plateado': '#C0C0C0',
+'Dorado': '#FFD700',
+'Negro/Blanco': 'linear-gradient(to right, #000000 50%, #FFFFFF 50%)',
+'Azul/Gris': 'linear-gradient(to right, #0000FF 50%, #808080 50%)',
+'Rojo/Negro': 'linear-gradient(to right, #FF0000 50%, #000000 50%)',
+'Multicolor': 'linear-gradient(to right, #FF0000, #FFA500, #FFFF00, #008000, #0000FF, #800080)'
+};
+return colorMap[colorName] || '#CCCCCC';
+}
+// Add to cart
+function addToCart(productId, options = {}) {
+const product = products.find(p => p.id === productId);
+if (!product) return;
+const cartItem = {
+id: Date.now(),
+productId: product.id,
+name: product.name,
+price: product.discountPrice > 0 && product.discountPrice < product.price ? product.discountPrice : product.price,
+originalPrice: product.price,
+image: product.imageURL,
+size: options.size || product.sizes[0],
+color: options.color || product.colors[0],
+quantity: options.quantity || 1
+};
+cart.push(cartItem);
+updateCartUI();
+showNotification('Producto agregado al carrito');
+}
+// Update cart UI
+function updateCartUI() {
+const settings = JSON.parse(localStorage.getItem('storeSettings')) || {
+storeName: 'logo',
+storeLogo: '',
+storePhone: '',
+currency: 'MXN',
+currencySymbol: '$',
+primaryColor: '#FF6B35',
+secondaryColor: '#4ECDC4'
+};
+// Update badge
+const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+cartBadge.textContent = totalItems;
+// Update cart items
+if (cart.length === 0) {
+cartItems.innerHTML = `
+<div class="flex items-center justify-center h-full text-gray-400">
+<div class="text-center">
+<div class="w-16 h-16 flex items-center justify-center mx-auto mb-3">
+<i class="ri-shopping-cart-line ri-3x"></i>
+</div>
+<p>Tu carrito está vacío</p>
+<p class="text-xs mt-2">Contáctanos: ${settings.storePhone}</p>
+</div>
+</div>
+`;
+} else {
+cartItems.innerHTML = '';
+cart.forEach(item => {
+const itemElement = document.createElement('div');
+itemElement.className = 'flex items-start border-b border-gray-100 py-3';
+itemElement.innerHTML = `
+<div class="w-16 h-16 rounded overflow-hidden mr-3 flex-shrink-0">
+<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover object-top">
+</div>
+<div class="flex-1">
+<h3 class="text-sm font-medium mb-1">${item.name}</h3>
+<p class="text-xs text-gray-500 mb-1">Talla: ${item.size} | Color: ${item.color}</p>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<button class="cart-decrease-qty w-6 h-6 border border-gray-200 rounded-l-button flex items-center justify-center cursor-pointer" data-id="${item.id}">
+<i class="ri-subtract-line text-xs"></i>
+</button>
+<span class="cart-qty w-8 h-6 border-t border-b border-gray-200 flex items-center justify-center text-xs">${item.quantity}</span>
+<button class="cart-increase-qty w-6 h-6 border border-gray-200 rounded-r-button flex items-center justify-center cursor-pointer" data-id="${item.id}">
+<i class="ri-add-line text-xs"></i>
+</button>
+</div>
+<div>
+<span class="text-sm font-medium">${settings.currencySymbol}${(item.price * item.quantity).toFixed(2)}</span>
+</div>
+</div>
+</div>
+<button class="remove-cart-item ml-2 text-gray-400 hover:text-red-500 cursor-pointer" data-id="${item.id}">
+<i class="ri-close-line"></i>
+</button>
+`;
+cartItems.appendChild(itemElement);
+});
+// Add event listeners
+const decreaseBtns = cartItems.querySelectorAll('.cart-decrease-qty');
+decreaseBtns.forEach(btn => {
+btn.addEventListener('click', function() {
+const itemId = parseInt(this.dataset.id);
+updateCartItemQuantity(itemId, -1);
+});
+});
+const increaseBtns = cartItems.querySelectorAll('.cart-increase-qty');
+increaseBtns.forEach(btn => {
+btn.addEventListener('click', function() {
+const itemId = parseInt(this.dataset.id);
+updateCartItemQuantity(itemId, 1);
+});
+});
+const removeBtns = cartItems.querySelectorAll('.remove-cart-item');
+removeBtns.forEach(btn => {
+btn.addEventListener('click', function() {
+const itemId = parseInt(this.dataset.id);
+removeCartItem(itemId);
+});
+});
+}
+// Update totals
+const subtotal = cart.reduce((total, item) => total + (item.originalPrice * item.quantity), 0);
+const discountTotal = cart.reduce((total, item) => total + ((item.originalPrice - item.price) * item.quantity), 0);
+const total = subtotal - discountTotal;
+cartSubtotal.textContent = `${settings.currencySymbol}${subtotal.toFixed(2)}`;
+cartDiscount.textContent = `-${settings.currencySymbol}${discountTotal.toFixed(2)}`;
+cartTotal.textContent = `${settings.currencySymbol}${total.toFixed(2)}`;
+}
+// Update cart item quantity
+function updateCartItemQuantity(itemId, change) {
+const itemIndex = cart.findIndex(item => item.id === itemId);
+if (itemIndex === -1) return;
+const newQuantity = cart[itemIndex].quantity + change;
+if (newQuantity <= 0) {
+removeCartItem(itemId);
+} else {
+const product = products.find(p => p.id === cart[itemIndex].productId);
+if (newQuantity <= product.stock) {
+cart[itemIndex].quantity = newQuantity;
+updateCartUI();
+} else {
+showNotification('No hay suficiente stock disponible');
+}
+}
+}
+// Remove cart item
+function removeCartItem(itemId) {
+cart = cart.filter(item => item.id !== itemId);
+updateCartUI();
+}
+// Show notification
+function showNotification(message) {
+const notification = document.createElement('div');
+notification.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm z-50';
+notification.textContent = message;
+document.body.appendChild(notification);
+setTimeout(() => {
+notification.style.opacity = '0';
+notification.style.transition = 'opacity 0.3s ease-in-out';
+setTimeout(() => {
+document.body.removeChild(notification);
+}, 300);
+}, 2000);
+}
+// Edit product
+function editProduct(productId) {
+const product = products.find(p => p.id === productId);
+if (!product) return;
+document.getElementById('formTitle').textContent = 'Editar Producto';
+document.getElementById('productId').value = product.id;
+document.getElementById('productName').value = product.name;
+document.getElementById('productDescription').value = product.description;
+document.getElementById('productPrice').value = product.price;
+document.getElementById('productDiscountPrice').value = product.discountPrice || '';
+document.getElementById('productSKU').value = product.sku;
+document.getElementById('productStock').value = product.stock;
+document.getElementById('productCategory').value = product.category;
+document.getElementById('productImageURL').value = product.imageURL;
+document.getElementById('productVideoURL').value = product.videoURL || '';
+document.getElementById('productPromotion').value = product.promotion || '';
+// Set sizes
+const sizeCheckboxes = document.querySelectorAll('input[name="sizes"]');
+sizeCheckboxes.forEach(checkbox => {
+checkbox.checked = product.sizes.includes(checkbox.value);
+});
+// Set colors
+const colorCheckboxes = document.querySelectorAll('input[name="colors"]');
+colorCheckboxes.forEach(checkbox => {
+checkbox.checked = product.colors.includes(checkbox.value);
+});
+productFormModal.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+}
+// Clone product
+function cloneProduct(productId) {
+const product = products.find(p => p.id === productId);
+if (!product) return;
+const clonedProduct = { ...product };
+clonedProduct.id = products.length + 1;
+clonedProduct.name = `${product.name} (Copia)`;
+clonedProduct.sku = `${product.sku}-COPY`;
+products.push(clonedProduct);
+renderProducts();
+showNotification('Producto clonado exitosamente');
+}
+// Delete product
+function deleteProduct(productId) {
+if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+const index = products.findIndex(p => p.id === productId);
+if (index !== -1) {
+products.splice(index, 1);
+renderProducts();
+// Save products to localStorage after deletion
+localStorage.setItem('products', JSON.stringify(products));
+showNotification('Producto eliminado exitosamente');
+}
+}
+}
+// Checkout
+function checkout() {
+const settings = JSON.parse(localStorage.getItem('storeSettings')) || {
+storeName: 'logo',
+storeLogo: '',
+storePhone: '',
+currency: 'MXN',
+currencySymbol: '$',
+primaryColor: '#FF6B35',
+secondaryColor: '#4ECDC4'
+};
+if (cart.length === 0) {
+showNotification('Tu carrito está vacío');
+return;
+}
+// Format cart items for WhatsApp
+let message = '🛒 *NUEVO PEDIDO*\n\n';
+message += '*Productos:*\n';
+cart.forEach((item, index) => {
+message += `${index + 1}. ${item.name}\n`;
+message += `   - Talla: ${item.size}\n`;
+message += `   - Color: ${item.color}\n`;
+message += `   - Cantidad: ${item.quantity}\n`;
+message += `   - Precio: ${settings.currencySymbol}${item.price.toFixed(2)}\n`;
+message += `   - Subtotal: ${settings.currencySymbol}${(item.price * item.quantity).toFixed(2)}\n\n`;
+});
+const subtotal = cart.reduce((total, item) => total + (item.originalPrice * item.quantity), 0);
+const discountTotal = cart.reduce((total, item) => total + ((item.originalPrice - item.price) * item.quantity), 0);
+const total = subtotal - discountTotal;
+message += '*Resumen:*\n';
+message += `Subtotal: ${settings.currencySymbol}${subtotal.toFixed(2)}\n`;
+message += `Descuento: -${settings.currencySymbol}${discountTotal.toFixed(2)}\n`;
+message += `Total: ${settings.currencySymbol}${total.toFixed(2)}\n\n`;
+message += '¡Gracias por tu compra!';
+// Encode message for WhatsApp
+const encodedMessage = encodeURIComponent(message);
+const whatsappURL = `https://wa.me/${settings.storePhone}?text=${encodedMessage}`;
+// Open WhatsApp
+window.open(whatsappURL, '_blank');
+// Clear cart
+cart = [];
+updateCartUI();
+closeCart();
+}
+// Event listeners
+document.getElementById('cartBtn').addEventListener('click', function() {
+cartDrawer.classList.remove('closed');
+cartDrawer.classList.add('open');
+});
+document.getElementById('tabCartBtn').addEventListener('click', function() {
+cartDrawer.classList.remove('closed');
+cartDrawer.classList.add('open');
+});
+document.getElementById('closeCartBtn').addEventListener('click', closeCart);
+function closeCart() {
+cartDrawer.classList.remove('open');
+cartDrawer.classList.add('closed');
+}
+document.getElementById('closeDetailBtn').addEventListener('click', function() {
+productDetailModal.classList.add('hidden');
+document.body.style.overflow = '';
+});
+document.getElementById('searchBtn').addEventListener('click', function() {
+searchBar.classList.toggle('hidden');
+});
+// Add Options Menu Toggle
+document.getElementById('toggleAddOptionsBtn').addEventListener('click', function() {
+const menu = document.getElementById('addOptionsMenu');
+menu.classList.toggle('hidden');
+});
+// Add Product Button Handler
+document.getElementById('addProductBtn').addEventListener('click', function() {
+document.getElementById('addOptionsMenu').classList.add('hidden');
+document.getElementById('formTitle').textContent = 'Agregar Producto';
+document.getElementById('productForm').reset();
+document.getElementById('productId').value = '';
+productFormModal.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+});
+// Category Management
+let categories = [
+{ id: 1, name: 'Camisetas', imageURL: 'https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20t-shirt%20clothing%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat1&orientation=squarish' },
+{ id: 2, name: 'Pantalones', imageURL: 'https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20pants%20clothing%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat2&orientation=squarish' },
+{ id: 3, name: 'Zapatos', imageURL: 'https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20sneakers%20shoes%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat3&orientation=squarish' },
+{ id: 4, name: 'Accesorios', imageURL: 'https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20necklace%20jewelry%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat4&orientation=squarish' },
+{ id: 5, name: 'Vestidos', imageURL: 'https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%2C%20dress%20clothing%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20vibrant%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=64&height=64&seq=cat5&orientation=squarish' }
+];
+// Add Category Button Handler
+function showCategoryModal() {
+document.getElementById('addOptionsMenu').classList.add('hidden');
+document.getElementById('categoryId').value = '';
+document.getElementById('categoryForm').reset();
+document.getElementById('categoryForm').classList.add('hidden');
+document.getElementById('categoryModal').classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+renderCategories();
+}
+// Add New Category Button Handler
+document.addEventListener('DOMContentLoaded', function() {
+document.getElementById('addNewCategoryBtn').addEventListener('click', function() {
+document.getElementById('categoryForm').classList.remove('hidden');
+document.getElementById('categoryId').value = '';
+document.getElementById('categoryForm').reset();
+});
+});
+// Close Category Modal Button Handler
+document.getElementById('closeCategoryModalBtn').addEventListener('click', closeCategoryModal);
+document.getElementById('cancelCategoryBtn').addEventListener('click', closeCategoryModal);
+function closeCategoryModal() {
+document.getElementById('categoryModal').classList.add('hidden');
+document.body.style.overflow = '';
+}
+// Render Categories List
+function renderCategories() {
+const categoriesList = document.getElementById('categoriesList');
+categoriesList.innerHTML = '';
+categories.forEach(category => {
+const categoryElement = document.createElement('div');
+categoryElement.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+categoryElement.innerHTML = `
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden">
+<img src="${category.imageURL}" alt="${category.name}" class="w-full h-full object-cover">
+</div>
+<span class="font-medium">${category.name}</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="edit-category-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-300" data-id="${category.id}">
+<i class="ri-edit-line"></i>
+</button>
+<button class="delete-category-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-300" data-id="${category.id}">
+<i class="ri-delete-bin-line"></i>
+</button>
+</div>
+`;
+categoriesList.appendChild(categoryElement);
+});
+// Add event listeners to edit and delete buttons
+document.querySelectorAll('.edit-category-btn').forEach(btn => {
+btn.addEventListener('click', function() {
+const categoryId = parseInt(this.dataset.id);
+editCategory(categoryId);
+});
+});
+document.querySelectorAll('.delete-category-btn').forEach(btn => {
+btn.addEventListener('click', function() {
+const categoryId = parseInt(this.dataset.id);
+deleteCategory(categoryId);
+});
+});
+}
+// Category Form Submit Handler
+document.getElementById('categoryForm').addEventListener('submit', function(e) {
+e.preventDefault();
+const categoryId = document.getElementById('categoryId').value;
+const name = document.getElementById('categoryName').value;
+const imageURL = document.getElementById('categoryImageURL').value;
+if (categoryId) {
+// Edit existing category
+const index = categories.findIndex(c => c.id === parseInt(categoryId));
+if (index !== -1) {
+categories[index] = { ...categories[index], name, imageURL };
+showNotification('Categoría actualizada exitosamente');
+}
+} else {
+// Add new category
+const newCategory = {
+id: categories.length + 1,
+name,
+imageURL
+};
+categories.push(newCategory);
+showNotification('Categoría agregada exitosamente');
+}
+renderCategories();
+closeCategoryModal();
+});
+// Edit Category
+function editCategory(categoryId) {
+const category = categories.find(c => c.id === categoryId);
+if (category) {
+document.getElementById('categoryForm').classList.remove('hidden');
+document.getElementById('categoryId').value = category.id;
+document.getElementById('categoryName').value = category.name;
+document.getElementById('categoryImageURL').value = category.imageURL;
+}
+}
+// Delete Category
+function deleteCategory(categoryId) {
+if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
+categories = categories.filter(c => c.id !== categoryId);
+renderCategories();
+showNotification('Categoría eliminada exitosamente');
+}
+}
+document.getElementById('closeFormBtn').addEventListener('click', closeProductForm);
+document.getElementById('cancelFormBtn').addEventListener('click', closeProductForm);
+function closeProductForm() {
+productFormModal.classList.add('hidden');
+document.body.style.overflow = '';
+}
+document.getElementById('productForm').addEventListener('submit', function(e) {
+e.preventDefault();
+const productId = document.getElementById('productId').value;
+const isEdit = productId !== '';
+// Get form values
+const formData = {
+name: document.getElementById('productName').value,
+description: document.getElementById('productDescription').value,
+price: parseFloat(document.getElementById('productPrice').value),
+discountPrice: parseFloat(document.getElementById('productDiscountPrice').value) || 0,
+sku: document.getElementById('productSKU').value,
+stock: parseInt(document.getElementById('productStock').value),
+category: document.getElementById('productCategory').value,
+imageURL: document.getElementById('productImageURL').value,
+videoURL: document.getElementById('productVideoURL').value,
+promotion: document.getElementById('productPromotion').value
+};
+// Get selected sizes
+const sizeCheckboxes = document.querySelectorAll('input[name="sizes"]:checked');
+formData.sizes = Array.from(sizeCheckboxes).map(checkbox => checkbox.value);
+// Get selected colors
+const colorCheckboxes = document.querySelectorAll('input[name="colors"]:checked');
+formData.colors = Array.from(colorCheckboxes).map(checkbox => checkbox.value);
+if (isEdit) {
+// Update existing product
+const index = products.findIndex(p => p.id === parseInt(productId));
+if (index !== -1) {
+formData.id = parseInt(productId);
+products[index] = formData;
+showNotification('Producto actualizado exitosamente');
+}
+} else {
+// Add new product
+formData.id = products.length + 1;
+products.push(formData);
+showNotification('Producto agregado exitosamente');
+}
+renderProducts();
+closeProductForm();
+// Save products to localStorage
+localStorage.setItem('products', JSON.stringify(products));
+});
+document.getElementById('checkoutBtn').addEventListener('click', checkout);
+// Admin settings
+const adminCredentials = {
+username: 'admin',
+password: '1234'
+};
+let isAdminLoggedIn = false;
+// Check if admin is already logged in
+if (localStorage.getItem('adminLoggedIn') === 'true') {
+isAdminLoggedIn = true;
+loadAdminSettings();
+}
+// Load settings from localStorage
+function loadAdminSettings() {
+const settings = JSON.parse(localStorage.getItem('storeSettings')) || {
+storeName: 'logo',
+storeLogo: '',
+storePhone: '',
+countryCode: '+52',
+currency: 'MXN',
+currencySymbol: '$',
+primaryColor: '#FF6B35',
+secondaryColor: '#4ECDC4'
+};
+document.getElementById('settingsStoreName').value = settings.storeName;
+document.getElementById('settingsStoreLogo').value = settings.storeLogo;
+document.getElementById('settingsStorePhone').value = settings.storePhone.replace(settings.countryCode, '');
+document.getElementById('settingsCountryCode').value = settings.countryCode;
+document.getElementById('settingsCurrency').value = settings.currency;
+document.getElementById('settingsCurrencySymbol').value = settings.currencySymbol;
+document.getElementById('settingsPrimaryColor').value = settings.primaryColor;
+document.getElementById('settingsSecondaryColor').value = settings.secondaryColor;
+// Update store name in header
+document.getElementById('storeName').textContent = settings.storeName;
+// Update theme colors
+updateThemeColors(settings.primaryColor, settings.secondaryColor);
+}
+// Update theme colors
+function updateThemeColors(primary, secondary) {
+const style = document.createElement('style');
+style.textContent = `
+:root {
+--primary-color: ${primary};
+--secondary-color: ${secondary};
+}
+`;
+document.head.appendChild(style);
+}
+// Currency symbols map
+const currencySymbols = {
+MXN: '$',
+USD: '$',
+PEN: 'S/',
+EUR: '€',
+COP: '$',
+ARS: '$'
+};
+// Admin login form handler
+document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+e.preventDefault();
+const username = document.getElementById('adminUsername').value;
+const password = document.getElementById('adminPassword').value;
+if (username === adminCredentials.username && password === adminCredentials.password) {
+isAdminLoggedIn = true;
+localStorage.setItem('adminLoggedIn', 'true');
+document.getElementById('adminLoginModal').classList.add('hidden');
+document.getElementById('adminSettingsPanel').classList.remove('hidden');
+loadAdminSettings();
+} else {
+showNotification('Usuario o contraseña incorrectos');
+}
+});
+// Save settings handler
+document.getElementById('saveSettingsBtn').addEventListener('click', function() {
+const countryCode = document.getElementById('settingsCountryCode').value;
+const phoneNumber = document.getElementById('settingsStorePhone').value;
+const settings = {
+storeName: document.getElementById('settingsStoreName').value,
+storeLogo: document.getElementById('settingsStoreLogo').value,
+storePhone: phoneNumber ? countryCode + phoneNumber : '',
+countryCode: countryCode,
+currency: document.getElementById('settingsCurrency').value,
+currencySymbol: currencySymbols[document.getElementById('settingsCurrency').value],
+primaryColor: document.getElementById('settingsPrimaryColor').value,
+secondaryColor: document.getElementById('settingsSecondaryColor').value
+};
+localStorage.setItem('storeSettings', JSON.stringify(settings));
+document.getElementById('storeName').textContent = settings.storeName;
+updateThemeColors(settings.primaryColor, settings.secondaryColor);
+renderProducts(); // Re-render products with new currency
+updateCartUI(); // Update cart with new currency
+document.getElementById('adminSettingsPanel').classList.add('hidden');
+showNotification('Cambios guardados exitosamente');
+});
+// Currency selector handler
+document.getElementById('settingsCurrency').addEventListener('change', function() {
+document.getElementById('settingsCurrencySymbol').value = currencySymbols[this.value];
+});
+// Admin button handler
+document.getElementById('adminBtn').addEventListener('click', function() {
+if (isAdminLoggedIn) {
+document.getElementById('adminSettingsPanel').classList.remove('hidden');
+} else {
+document.getElementById('adminLoginModal').classList.remove('hidden');
+}
+});
+// Close buttons handlers
+document.getElementById('closeAdminLoginBtn').addEventListener('click', function() {
+document.getElementById('adminLoginModal').classList.add('hidden');
+});
+document.getElementById('closeAdminSettingsBtn').addEventListener('click', function() {
+document.getElementById('adminSettingsPanel').classList.add('hidden');
+});
+// Initialize
+renderProducts();
+updateCartUI();
+loadAdminSettings();
+// WhatsApp button handler
+document.getElementById('whatsappBtn').addEventListener('click', function(e) {
+e.preventDefault();
+const settings = JSON.parse(localStorage.getItem('storeSettings')) || {
+storePhone: '',
+countryCode: '+52'
+};
+const phoneNumber = settings.storePhone.replace(/\D/g, '');
+if (phoneNumber) {
+window.open(`https://wa.me/${phoneNumber}`, '_blank');
+} else {
+showNotification('No hay número de teléfono configurado');
+}
+});
+});
+</script>
+</body>
+</html>
