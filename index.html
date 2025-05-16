@@ -666,11 +666,11 @@ Guardar Cambios
 document.addEventListener('DOMContentLoaded', function() {
 const toggleAddOptionsBtn = document.getElementById('toggleAddOptionsBtn');
 window.showProductForm = function() {
-document.getElementById('formTitle').textContent = 'Agregar Producto';
-document.getElementById('productForm').reset();
-document.getElementById('productId').value = '';
-document.getElementById('productFormModal').classList.remove('hidden');
-document.body.style.overflow = 'hidden';
+  document.getElementById('formTitle').textContent = 'Agregar Producto';
+  document.getElementById('productForm').reset();
+  document.getElementById('productId').value = '';
+  document.getElementById('productFormModal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
 };
 toggleAddOptionsBtn.addEventListener('click', showProductForm);
 document.addEventListener('click', function(event) {
@@ -789,17 +789,7 @@ ${isAdmin ? `
 </div>` : ''}
 ${product.videoURL ? '<div class="absolute bottom-2 right-2 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center"><i class="ri-play-fill text-white"></i></div>' : ''}
 ${product.promotion ? `<div class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded-full">${getPromotionLabel(product.promotion)}</div>` : ''}
-<div class="absolute inset-0 bg-black/5 opacity-0 hover:opacity-100 transition-opacity duration-200" onclick="event.stopPropagation()">
-${isAdmin ? `
-<div class="absolute top-2 right-2 flex items-center space-x-1">
-<button class="w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" onclick="editProduct(${product.id})">
-<i class="ri-edit-line"></i>
-</button>
-<button class="w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" onclick="deleteProduct(${product.id})">
-<i class="ri-delete-bin-line"></i>
-</button>
-</div>` : ''}
-</div>
+<div class="absolute inset-0 bg-black/5 opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
 </div>
 <div class="p-3">
 <h3 class="text-sm font-medium mb-1 line-clamp-1">${product.name}</h3>
@@ -822,10 +812,22 @@ productsGrid.appendChild(productCard);
 // Add event listeners
 productCard.addEventListener('click', () => showProductDetail(product.id));
 const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
-if (addToCartBtn) {
 addToCartBtn.addEventListener('click', (e) => {
 e.stopPropagation();
 addToCart(product.id);
+});
+const editBtn = productCard.querySelector('.edit-product-btn');
+if (editBtn) {
+editBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+editProduct(product.id);
+});
+}
+const deleteBtn = productCard.querySelector('.delete-product-btn');
+if (deleteBtn) {
+deleteBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+deleteProduct(product.id);
 });
 }
 });
@@ -986,17 +988,7 @@ ${isAdmin ? `
 </div>` : ''}
 ${product.videoURL ? '<div class="absolute bottom-2 right-2 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center"><i class="ri-play-fill text-white"></i></div>' : ''}
 ${product.promotion ? `<div class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded-full">${getPromotionLabel(product.promotion)}</div>` : ''}
-<div class="absolute inset-0 bg-black/5 opacity-0 hover:opacity-100 transition-opacity duration-200" onclick="event.stopPropagation()">
-${isAdmin ? `
-<div class="absolute top-2 right-2 flex items-center space-x-1">
-<button class="w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" onclick="editProduct(${product.id})">
-<i class="ri-edit-line"></i>
-</button>
-<button class="w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" onclick="deleteProduct(${product.id})">
-<i class="ri-delete-bin-line"></i>
-</button>
-</div>` : ''}
-</div>
+<div class="absolute inset-0 bg-black/5 opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
 </div>
 <div class="p-3">
 <h3 class="text-sm font-medium mb-1 line-clamp-1">${product.name}</h3>
@@ -1019,10 +1011,22 @@ productsGrid.appendChild(productCard);
 // Add event listeners
 productCard.addEventListener('click', () => showProductDetail(product.id));
 const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
-if (addToCartBtn) {
 addToCartBtn.addEventListener('click', (e) => {
 e.stopPropagation();
 addToCart(product.id);
+});
+const editBtn = productCard.querySelector('.edit-product-btn');
+if (editBtn) {
+editBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+editProduct(product.id);
+});
+}
+const deleteBtn = productCard.querySelector('.delete-product-btn');
+if (deleteBtn) {
+deleteBtn.addEventListener('click', (e) => {
+e.stopPropagation();
+deleteProduct(product.id);
 });
 }
 });
